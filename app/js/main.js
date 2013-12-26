@@ -23,20 +23,20 @@ var actorMap;
 
 
 // map
-function initMap() {
-    map = [];
-    for(var y = 0; y < ROWS; y++) {
-        var newRow = [];
-        for(var x = 0; x < COLS; x++) {
-            if(Math.random() > 0.8) {
-                newRow.push('#');
-            } else {
-                newRow.push('.');
-            }
-        }
-        map.push(newRow);
-    }
-}
+// function initMap() {
+//     map = [];
+//     for(var y = 0; y < ROWS; y++) {
+//         var newRow = [];
+//         for(var x = 0; x < COLS; x++) {
+//             if(Math.random() > 0.8) {
+//                 newRow.push('#');
+//             } else {
+//                 newRow.push('.');
+//             }
+//         }
+//         map.push(newRow);
+//     }
+// }
 
 function drawMap() {
     for(var y = 0; y < ROWS; y++) {
@@ -97,6 +97,8 @@ function drawActors() {
         if(actorList[i].hp > 0) {
             var actor = actorList[i];
             screen[actor.y][actor.x].content = i === 0 ? '' + player.hp : 'e';
+            screen[actor.y][actor.x].color = '#f66';
+            console.log(screen[actor.y][actor.x]);
         }
     }
 }
@@ -220,26 +222,16 @@ function onKeyUp(event) {
     }
 
     if(acted) {
-        // var i;
-        // var len = actorList.length;
-        // for(i = 0; i < len; i++) {
-        //     if(actorList[i] !== 0) {
-        //         var enemy = actorList[i];
-        //         if(enemy) {
-        //             aiAct(enemy);
-        //         }
-        //     }
-        // }
-
-        for (var enemy in actorList) {
-                        // skip the player
-                        if(enemy==0)
-                                continue;
-                        
-                        var e = actorList[enemy];
-                        if (e != null)
-                                aiAct(e);
+        var i;
+        var len = actorList.length;
+        for(i = 0; i < len; i++) {
+            if(i > 0) {
+                var enemy = actorList[i];
+                if(enemy) {
+                    aiAct(enemy);
                 }
+            }
+        }
     }
 
     drawActors();
@@ -248,7 +240,8 @@ function onKeyUp(event) {
 function create() {
     game.input.keyboard.addCallbacks(null, null, onKeyUp);
 
-    initMap();
+    // initMap();
+    map = new Map(ROWS, COLS);
 
     screen = [];
     for(var y = 0; y < ROWS; y++) {
