@@ -1,11 +1,12 @@
 /*global Phaser */
 /* global Actor */
+/*global HealthPickup */
 
 var FONT = 32;
 
 // map
-var ROWS = 10;
-var COLS = 15;
+var ROWS = 15;
+var COLS = 30;
 var map;
 
 var screen;
@@ -17,31 +18,22 @@ var player;
 var actorList;
 var livingEnemies;
 
+var PICKUPS = 3;
+var pickupList;
+var pickupMap;
+
 // refernece to each actor's position for quick lookups
 var actorMap;
 
 
 
 // map
-// function initMap() {
-//     map = [];
-//     for(var y = 0; y < ROWS; y++) {
-//         var newRow = [];
-//         for(var x = 0; x < COLS; x++) {
-//             if(Math.random() > 0.8) {
-//                 newRow.push('#');
-//             } else {
-//                 newRow.push('.');
-//             }
-//         }
-//         map.push(newRow);
-//     }
-// }
 
 function drawMap() {
     for(var y = 0; y < ROWS; y++) {
         for(var x = 0; x < COLS; x++) {
             screen[y][x].content = map[y][x];
+            screen[y][x].style.fill = '#fff';
         }
     }
 }
@@ -63,6 +55,7 @@ function initActors() {
 
         // player has more hp!
         if(i === 0) {
+            actor.name = 'Player';
             actor.hp = 3;
         }
 
@@ -76,6 +69,29 @@ function initActors() {
 
     player = actorList[0];
     livingEnemies = ACTORS - 1;
+}
+
+function initPickups() {
+    pickupList = [];
+    pickupMap = {};
+
+    var i;
+    for(i = 0; i < PICKUPS; i++) {
+        var pos = placeRandom(COLS, ROWS);
+        var pickup = new HealthPickup(pos.x, pos.y);
+        pickupMap[pickup.y + '_' + pickup.x] = pickup;
+        pickupList.push(pickup);
+    }
+}
+
+function drawPickups() {
+    var i;
+    var len = pickupList.length;
+    for(i = 0; i < len; i++) {
+        var pickup = pickupList[i];
+        screen[pickup.y][pickup.x].content = pickup.tile;
+        screen[pickup.y][pickup.x].style.fill = pickup.colour;
+    }
 }
 
 function placeRandom(maxX, maxY) {
@@ -96,9 +112,17 @@ function drawActors() {
     for(i = 0; i < len; i++) {
         if(actorList[i].hp > 0) {
             var actor = actorList[i];
-            screen[actor.y][actor.x].content = i === 0 ? '' + player.hp : 'e';
-            screen[actor.y][actor.x].color = '#f66';
-            console.log(screen[actor.y][actor.x]);
+            screen[actor.y][actor.x].content = i === 0 ? '' + player.hp : actor.tile;
+            if(actor.hp > 1) {
+                screen[actor.y][actor.x].style.fill = '#f11';
+            } else {
+                screen[actor.y][actor.x].style.fill = actor.colour;
+            }
+            
+            
+            if(actor.name === 'Player') {
+                screen[actor.y][actor.x].style.fill = '#1f6';
+            }
         }
     }
 }
@@ -112,10 +136,15 @@ function moveTo(actor, dir) {
 
     if(typeof actorMap[newKey] !== 'undefined' && actorMap[newKey]) {
         var victim = actorMap[newKey];
-
+        console.log(actor.name + ' attacks ' + victim.name);
         victim.hp--;
 
+
         if(victim.hp === 0) {
+            console.log(victim.name + ' dies!');
+            actor.hp++;
+            console.log(actor.name + ' increases in power! ' + actor.hp + ' health');
+
             delete actorMap[newKey];
             actorList.splice(actorList.indexOf(victim), 1);
 
@@ -144,6 +173,22 @@ function moveTo(actor, dir) {
         actor.x += dir.x;
 
         actorMap[actor.y + '_' + actor.x] = actor;
+        
+
+        if(pickupMap[actor.y + '_' + actor.x]) {
+            var pickup = pickupMap[actor.y + '_' + actor.x];
+
+            switch(pickup.constructor.name) {
+            case 'HealthPickup':
+                actor.hp++;
+                console.log(actor.name + ' health increases to ' + actor.hp);
+                break;
+            }
+
+            delete pickupMap[actor.y + '_' + actor.x];
+            pickupList.splice(pickupList.indexOf(pickup), 1);
+           
+        }
     }
 
     return true;
@@ -234,6 +279,7 @@ function onKeyUp(event) {
         }
     }
 
+    drawPickups();
     drawActors();
 }
 
@@ -253,11 +299,15 @@ function create() {
     }
 
     initActors();
+    initPickups();
 
     drawMap();
+    drawPickups();
     drawActors();
 }
 // end init
+
+
 
 // utils
 function randomInt(max) {
