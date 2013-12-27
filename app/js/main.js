@@ -136,14 +136,14 @@ function moveTo(actor, dir) {
 
     if(typeof actorMap[newKey] !== 'undefined' && actorMap[newKey]) {
         var victim = actorMap[newKey];
-        console.log(actor.name + ' attacks ' + victim.name);
+        log(actor.name + ' attacks ' + victim.name);
         victim.hp--;
 
 
         if(victim.hp === 0) {
-            console.log(victim.name + ' dies!');
+            log(victim.name + ' dies!');
             actor.hp++;
-            console.log(actor.name + ' increases in power! ' + actor.hp + ' health');
+            log(actor.name + ' increases in power! ' + actor.hp + ' health');
 
             delete actorMap[newKey];
             actorList.splice(actorList.indexOf(victim), 1);
@@ -161,6 +161,7 @@ function moveTo(actor, dir) {
                                         align: 'center'
                                     });
                     victory.anchor.setTo(0.5, 0.5);
+                    log('You win!');
                 }
             }
         }
@@ -181,7 +182,7 @@ function moveTo(actor, dir) {
             switch(pickup.constructor.name) {
             case 'HealthPickup':
                 actor.hp++;
-                console.log(actor.name + ' health increases to ' + actor.hp);
+                log(actor.name + ' health increases to ' + actor.hp);
                 break;
             }
 
@@ -230,8 +231,14 @@ function aiAct(actor) {
 
     if(player.hp < 1) {
         // game over man
-        var gameOver = game.add.text(game.world.centerX, game.world.centerY, 'Game Over!\nF5 to restart', { fill: '#e22', align: 'center' });
+        var gameOver = game.add.text(
+                        game.world.centerX, 
+                        game.world.centerY, 
+                        'Game Over!\nF5 to restart', 
+                        { fill: '#e22', align: 'center' }
+                        );
         gameOver.anchor.setTo(0.5, 0.5);
+        log('You lose!');
     }
 }
 
@@ -242,11 +249,12 @@ function aiAct(actor) {
 var game = new Phaser.Game(COLS * FONT * 0.6,
                            ROWS * FONT,
                            Phaser.AUTO,
-                           null,
+                           'main',
                            { create: create }
                            );
 
 function onKeyUp(event) {
+    // event.preventDefault();
     // redraw map
     drawMap();
 
@@ -320,4 +328,11 @@ function walkable(actor, dir) {
             actor.y + dir.y >= 0 &&
             actor.y + dir.y <= ROWS - 1 &&
             map[actor.y + dir.y][actor.x + dir.x] === '.';
+}
+
+function log(text) {
+    var output = document.getElementById('console');
+    var line = document.createElement('p');
+    line.innerHTML = text;
+    output.insertBefore(line, output.firstChild);
 }

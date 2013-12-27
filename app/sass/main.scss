@@ -13,6 +13,9 @@ html {
     line-height: 1.4;
 }
 
+* {
+    box-sizing: border-box;
+}
 
 /*
  * Remove text-shadow in selection highlight: h5bp.com/i
@@ -107,4 +110,23 @@ fieldset {
 
 .clearfix {
     *zoom: 1;
+}
+
+/* Main */
+#console {
+    width: 30%;
+    float: right;
+    padding: 1em;
+    height: 480px;
+    overflow-y: scroll;
+
+    p {
+        margin: 0.25em 0;
+    }
+}
+
+#main {
+    width: 80%;
+    margin: auto;
+    padding: 1em;
 }
